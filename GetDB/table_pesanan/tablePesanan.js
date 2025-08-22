@@ -486,11 +486,11 @@ function filterOrders() {
                 <td>
                     ${order.layout_link ? `<a href="${order.layout_link}" target="_blank">Lihat Layout</a>` : "-"}
                 </td>
+                <td><span class="badge_input ${getBadgeClass(order.status_print)}">${order.status_print || "-"}</span></td>
                 <td style="color: ${penjahitColor.color}; background-color: ${penjahitColor.backgroundColor}; padding: 5px; border-radius: 5px;">${penjahitList[order.id_penjahit] || "-"}</td>
                 <td>${formatTimestamp(order.timestamp_penjahit) || "-"}</td>
                 <td style="color: ${qcColor.color}; background-color: ${qcColor.backgroundColor}; padding: 5px; border-radius: 5px;">${qcList[order.id_qc] || "-"}</td>
                 <td>${formatTimestamp(order.timestamp_qc) || "-"}</td>
-                <td><span class="badge_input ${getBadgeClass(order.status_print)}">${order.status_print || "-"}</span></td>
                 <td><span class="badge_input ${getBadgeClass(order.status_produksi)}">${order.status_produksi || "-"}</span></td>
                 <td>
                     <div style="display: flex; gap: 10px; justify-content: center;">
@@ -1517,11 +1517,11 @@ function filterOrders() {
                 'DSG': typeof desainerList !== 'undefined' && desainerList[order.id_desainer] ? desainerList[order.id_desainer] : '-',
                 'TIME-dsg': formatTimestamp(order.timestamp_designer),
                 'LAY': order.layout_link || '-',
+                'PRT': order.status_print || '-',
                 'SEW': typeof penjahitList !== 'undefined' && penjahitList[order.id_penjahit] ? penjahitList[order.id_penjahit] : '-',
                 'TIME-sew': formatTimestamp(order.timestamp_penjahit),
                 'QC': typeof qcList !== 'undefined' && qcList[order.id_qc] ? qcList[order.id_qc] : '-',
                 'TIME-qc': formatTimestamp(order.timestamp_qc),
-                'PRT': order.status_print || '-',
                 'PROD': order.status_produksi || '-'
                 // Tambahkan kolom lain jika perlu
             }));
