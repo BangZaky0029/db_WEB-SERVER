@@ -442,7 +442,7 @@ function filterOrders() {
             if (id === 1503) return { color, backgroundColor: "tomato" }; // Kurir Jhodi
         } else if (table === 'penjahit') {
             if (id === 1301) return { color, backgroundColor: "green" }; // Penjahit Mas Ari
-            if (id === 1302) return { color, backgroundColor: "indigo" }; // Penjahit Mas Saep
+            if (id === 1302) return { color : "white", backgroundColor: "indigo" }; // Penjahit Mas Saep
             if (id === 1303) return { color, backgroundColor: "violet" }; // Penjahit Mas Egeng
             if (id === 1304) return { color, backgroundColor: "fireBrick" };
             if (id === 1305) return { color, backgroundColor: "darkOrchid" };
