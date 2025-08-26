@@ -566,6 +566,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${order.platform || "-"}
                 </td>
                 <td>${order.qty || "-"}</td>
+                <td><span class="badge_input ${getBadgeClass(order.status_print)}">${order.status_print || "-"}</span></td>
                 <td>
                     <select class="penjahit-dropdown" data-id="${order.id_input}" data-column="penjahit">
                     <option value="">Pilih Penjahit</option>
@@ -583,16 +584,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     </select>
                 </td>
                 <td>${formatTanggal(highlightDeadline(order.deadline))}</td>
-                <td><span class="badge_input ${getBadgeClass(order.status_print)}">${order.status_print || "-"}</span></td>
                 <td>
                     <select class="status-produksi" data-id="${order.id_input}" data-column="status_produksi">
                         <option value="-" ${order.status_produksi === '-' ? 'selected' : ''}>-</option>
-                        <option value="SEDANG DI PRESS" ${order.status_produksi === 'SEDANG DI PRESS' ? 'selected' : ''}>SEDANG DI PRESS</option>
-                        <option value="SEDANG DI JAHIT" ${order.status_produksi === 'SEDANG DI JAHIT' ? 'selected' : ''}>SEDANG DI JAHIT</option>
-                        <option value="TAS SUDAH DI JAHIT" ${order.status_produksi === 'TAS SUDAH DI JAHIT' ? 'selected' : ''}>TAS SUDAH DI JAHIT</option>
-                        <option value="REJECT PRINT ULANG" ${order.status_produksi === 'REJECT PRINT ULANG' ? 'selected' : ''}>REJECT PRINT ULANG</option>
-                        <option value="TAS BLM ADA" ${order.status_produksi === 'TAS BLM ADA' ? 'selected' : ''}>TAS BLM ADA</option>
+                        <option value="MENUNGGU KONFIRMASI" ${order.status_produksi === 'MENUNGGU KONFIRMASI' ? 'selected' : ''}>MENUNGGU KONFIRMASI</option>
+                        <option value="PROSES PRESS" ${order.status_produksi === 'PROSES PRESS' ? 'selected' : ''}>PROSES PRESS</option>
+                        <option value="PROSES JAHIT" ${order.status_produksi === 'PROSES JAHIT' ? 'selected' : ''}>PROSES JAHIT</option>
+                        <option value="PROSES QC" ${order.status_produksi === 'PROSES QC' ? 'selected' : ''}>PROSES QC</option>
                         <option value="DONE" ${order.status_produksi === 'DONE' ? 'selected' : ''}>DONE</option>
+                        <option value="REJECT PRINT ULANG" ${order.status_produksi === 'REJECT PRINT ULANG' ? 'selected' : ''}>REJECT PRINT ULANG</option>
                     </select>
                 </td>
                 <td>
@@ -616,12 +616,12 @@ document.addEventListener("DOMContentLoaded", function () {
             case 'PRINT VENDOR': return 'option-PRINT-VENDOR';
             case 'PROSES PRINT': return 'option-PROSES-PRINT';
             case 'SELESAI PRINT': return 'option-SELESAI-PRINT';
-            case 'SEDANG DI PRESS': return 'option-SEDANG-DI-PRESS';
-            case 'SEDANG DI JAHIT': return 'option-SEDANG-DI-JAHIT';
-            case 'TAS SUDAH DI JAHIT': return 'option-TAS-SUDAH-DI-JAHIT';
-            case 'REJECT PRINT ULANG': return 'option-REJECT-PRINT-ULANG';
-            case 'TAS BLM ADA': return 'option-TAS-BLM-ADA';
+            case 'MENUNGGU KONFIRMASI': return 'option-MENUNGGU-KONFIRMASI';
+            case 'PROSES PRESS': return 'option-PROSES-PRESS';
+            case 'PROSES JAHIT': return 'option-PROSES-JAHIT';
+            case 'PROSES QC': return 'option-PROSES-QC';
             case 'DONE': return 'option-DONE';
+            case 'REJECT PRINT ULANG': return 'option-REJECT-PRINT-ULANG';
             default: return 'option-default';
         }
     }

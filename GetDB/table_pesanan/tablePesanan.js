@@ -446,10 +446,15 @@ function filterOrders() {
             if (id === 1303) return { color, backgroundColor: "violet" }; // Penjahit Mas Egeng
             if (id === 1304) return { color, backgroundColor: "fireBrick" };
             if (id === 1305) return { color, backgroundColor: "darkOrchid" };
+            if (id === 1306) return { color, backgroundColor: "saddleBrown" };
+            if (id === 1307) return { color, backgroundColor: "darkCyan" };
+            if (id === 1308) return { color, backgroundColor: "darkMagenta" };
+
         } else if (table === 'qc') {
             if (id === 1401) return { color, backgroundColor: "yellowgreen" }; // QC tita
             if (id === 1402) return { color, backgroundColor: "olive" }; // QC ina
             if (id === 1403) return { color, backgroundColor: "pink" }; // QC Vinka
+            if (id === 1404) return { color, backgroundColor: "orange" };
         }
     
         return { color: "black", backgroundColor: "transparent" };
@@ -854,12 +859,14 @@ function filterOrders() {
             case 'EDITING': return 'option-EDITING';
             case 'PRINT VENDOR': return 'option-PRINT-VENDOR';
             case 'PROSES PRINT': return 'option-PROSES-PRINT';
+            case 'MENUNGGU KONFIRMASI': return 'option-MENUNGGU-KONFIRMASI';
             case 'SELESAI PRINT': return 'option-SELESAI-PRINT';
-            case 'SEDANG DI PRESS': return 'option-SEDANG-DI-PRESS';
-            case 'SEDANG DI JAHIT': return 'option-SEDANG-DI-JAHIT';
+            case 'PROSES PRESS': return 'option-PROSES-PRESS';
+            case 'PROSES JAHIT': return 'option-PROSES-JAHIT';
             case 'TAS SUDAH DI JAHIT': return 'option-TAS-SUDAH-DI-JAHIT';
             case 'REJECT PRINT ULANG': return 'option-REJECT-PRINT-ULANG';
             case 'TAS BLM ADA': return 'option-TAS-BLM-ADA';
+            case 'PROSES QC': return 'option-PROSES-QC';
             case 'DONE': return 'option-DONE';
             default: return 'option-default';
         }
