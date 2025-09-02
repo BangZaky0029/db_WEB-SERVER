@@ -149,7 +149,7 @@ async function loadNotes(id_input, table_source) {
         document.getElementById('noteModalTableSource').textContent = table_source;
         
         // Use the new endpoint that gets all notes for the id_input
-        const response = await fetch(`http://100.124.58.32:5000/api/notes/${id_input}`);
+        const response = await fetch(`http://100.117.80.112:5000/api/notes/${id_input}`);
         
         if (response.ok) {
             const data = await response.json();
@@ -277,7 +277,7 @@ async function addNewNote() {
      
      // Verify PIN first
      try {
-         const pinResponse = await fetch('http://100.124.58.32:5000/api/auth/verify-pin', {
+         const pinResponse = await fetch('http://100.117.80.112:5000/api/auth/verify-pin', {
              method: 'POST',
              headers: {
                  'Content-Type': 'application/json'
@@ -305,7 +305,7 @@ async function addNewNote() {
      }
      
      try {
-         const response = await fetch('http://100.124.58.32:5000/api/notes', {
+         const response = await fetch('http://100.117.80.112:5000/api/notes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -411,7 +411,7 @@ async function updateNote(noteId) {
     
     // Verify PIN first
     try {
-        const pinResponse = await fetch('http://100.124.58.32:5000/api/auth/verify-pin', {
+        const pinResponse = await fetch('http://100.117.80.112:5000/api/auth/verify-pin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -439,7 +439,7 @@ async function updateNote(noteId) {
      }
     
     try {
-        const response = await fetch(`http://100.124.58.32:5000/api/notes/${noteId}`, {
+        const response = await fetch(`http://100.117.80.112:5000/api/notes/${noteId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
