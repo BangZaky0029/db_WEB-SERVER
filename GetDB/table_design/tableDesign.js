@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchOrders() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/get_table_design");
+            const response = await fetch("http://100.124.58.32:5000/api/get_table_design");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.status === "success") {
                 allOrders = data.data;
                 renderOrdersTable(paginateOrders(allOrders));
-                updatePagination(allOrders);
+                updatePagination();
             } else {
                 console.error("Gagal mengambil data:", data.message);
                 showResultPopup("Gagal mengambil data pesanan.", true);
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderOrdersTable(paginatedData);
         
         // Update pagination
-        updatePagination(dataToDisplay);
+        updatePagination();
     }
     
     function updatePagination() {
@@ -176,10 +176,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Calculate total pages based on unfinished orders count
         const totalPages = Math.ceil(totalUnfinished / itemsPerPage);
 
-        // Ensure current page is valid
+        // Ensure current page is valid (without recursive call)
         if (currentPage > totalPages) {
             currentPage = totalPages || 1;
-            updateTableDisplay();
+            // Don't call updateTableDisplay() here to avoid infinite recursion
         }
 
         const pageInfo = document.getElementById("pageInfo");
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Tombol Previous Page
         document.getElementById("prevPage").addEventListener("click", function() {
             if (currentPage > 1) {
-                currentPage = Math.min(totalPages, currentPage - 1); // Menambah 1 halaman
+                currentPage = currentPage - 1; // Mengurangi 1 halaman
                 updateTableDisplay();
             }
         });
@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("nextPage").addEventListener("click", function() {
             const totalPages = Math.ceil((filteredOrders.length || allOrders.length) / itemsPerPage);
             if (currentPage < totalPages) {
-                currentPage = Math.min(totalPages, currentPage + 1); // Menambah 1 halaman
+                currentPage = currentPage + 1; // Menambah 1 halaman
                 updateTableDisplay();
             }
         });
@@ -432,7 +432,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         currentPage = 1;
         renderOrdersTable(paginateOrders(filteredOrders));
-        updatePagination(filteredOrders);
+        updatePagination();
     
         showResultPopup(`Ditemukan ${filteredOrders.length} pesanan dengan status: ${status}`);
     }
@@ -635,7 +635,7 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
                 formData.append('layout_file', file);
                 formData.append('id_input', id_input);
 
-                const response = await fetch('http://100.117.80.112:5000/api/update-layout', {
+                const response = await fetch('http://100.124.58.32:5000/api/update-layout', {
                     method: 'POST',
                     body: formData
                 });
@@ -851,7 +851,7 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
                     formData.append('layout_file', file);
                     formData.append('id_input', id_input);
 
-                    const response = await fetch('http://100.117.80.112:5000/api/update-layout', {
+                    const response = await fetch('http://100.124.58.32:5000/api/update-layout', {
                         method: 'POST',
                         body: formData
                     });
@@ -1070,6 +1070,16 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
                 <td>
                     <div style="display: flex; gap: 10px; justify-content: center;">
                         <button class="desc-table" data-id="${order.id_input}"><i class="fas fa-info-circle"></i></button>
+                        <button class="note-btn" 
+                            data-id="${order.id_input}" 
+                            data-table-source="table_design"
+                            title="Note"
+                            style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; border-radius: 6px; padding: 6px 10px; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(133,100,4,0.04); cursor: pointer;"
+                            onmouseover="this.style.background='#fff3cd'; this.style.boxShadow='0 2px 6px rgba(133,100,4,0.10)';"
+                            onmouseout="this.style.background='#fff3cd'; this.style.boxShadow='0 1px 2px rgba(133,100,4,0.04)';"
+                        >
+                            <i class="fas fa-sticky-note"></i>
+                        </button>
                         <button class="copy-order-btn" 
                             data-id="${order.id_input}" 
                             data-qty="${order.qty || '-'}"
@@ -1103,7 +1113,7 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
             let produk = btn.getAttribute('data-produk');
 
             try {
-                const response = await fetch(`http://100.117.80.112:5000/api/get_nama_ket/${id_input}`);
+                const response = await fetch(`http://100.124.58.32:5000/api/get_nama_ket/${id_input}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.nama_ket) {
@@ -1144,6 +1154,14 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
         };
     });
 
+    // Attach note event listeners AFTER rendering table
+    document.querySelectorAll('.note-btn').forEach(btn => {
+        btn.onclick = function() {
+            const id_input = btn.getAttribute('data-id');
+            const table_source = btn.getAttribute('data-table-source');
+            openNoteModal(id_input, table_source);
+        };
+    });
             
     }
 
@@ -1212,7 +1230,7 @@ function showTopNotification(message) {
         formData.append('id_input', id_input);
     
         try {
-            const response = await fetch('http://100.117.80.112:5000/api/update-layout', {
+            const response = await fetch('http://100.124.58.32:5000/api/update-layout', {
                 method: 'POST',
                 body: formData
             });
@@ -1607,7 +1625,7 @@ function showTopNotification(message) {
     
     async function fetchReferenceData() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/references");
+            const response = await fetch("http://100.124.58.32:5000/api/references");
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             
             const data = await response.json();
@@ -1663,7 +1681,7 @@ function showTopNotification(message) {
         }
     
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get_link_foto/${id_input}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get_link_foto/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -1745,7 +1763,7 @@ function showTopNotification(message) {
     }
 
     async function fetchNamaKet(idInput) {
-        const baseUrl = "http://100.117.80.112:5000"; // Sesuaikan dengan URL API kamu
+        const baseUrl = "http://100.124.58.32:5000"; // Sesuaikan dengan URL API kamu
         const url = `${baseUrl}/api/get_nama_ket/${idInput}`;
     
         try {
@@ -1774,7 +1792,7 @@ function showTopNotification(message) {
         }
     
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get_id_admin/${id_input}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get_id_admin/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -1836,7 +1854,7 @@ function showTopNotification(message) {
         confirmDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
     
         // Corrected endpoint to use id_input instead of id_pesanan
-        fetch(`http://100.117.80.112:5000/api/delete-order/${encodeURIComponent(selectedOrderId.trim())}`, { 
+        fetch(`http://100.124.58.32:5000/api/delete-order/${encodeURIComponent(selectedOrderId.trim())}`, { 
             method: "DELETE",
             headers: { "Content-Type": "application/json" }
         })
@@ -1978,7 +1996,7 @@ function showTopNotification(message) {
     }
     
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.117.80.112:5000/api/update-design";
+        const endpoint = "http://100.124.58.32:5000/api/update-design";
         
         // Check if confirmUpdateBtn exists before accessing
         const confirmUpdateBtn = document.getElementById("confirmUpdateBtn");

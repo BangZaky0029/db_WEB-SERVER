@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault(); // Hindari reload form
     
         const formData = new FormData(this);
-        const response = await fetch("http://100.117.80.112:5000/api/get_table_prod", {
+        const response = await fetch("http://100.124.58.32:5000/api/get_table_prod", {
             method: "POST",
             body: JSON.stringify(Object.fromEntries(formData)),
             headers: { "Content-Type": "application/json" },
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update fetchOrders to pass isSearching parameter
     async function fetchOrders() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/get_table_prod");
+            const response = await fetch("http://100.124.58.32:5000/api/get_table_prod");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -598,6 +598,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td>
                     <div style="display: flex; gap: 10px; justify-content: center;">
                         <button class="desc-table" data-id="${order.id_input}"><i class="fas fa-info-circle"></i></button>
+                        <button class="note-btn" 
+                            data-id="${order.id_input}" 
+                            data-table-source="table_produksi"
+                            title="Note"
+                            style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; border-radius: 6px; padding: 6px 10px; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(133,100,4,0.04); cursor: pointer;"
+                            onmouseover="this.style.background='#fff3cd'; this.style.boxShadow='0 2px 6px rgba(133,100,4,0.10)';"
+                            onmouseout="this.style.background='#fff3cd'; this.style.boxShadow='0 1px 2px rgba(133,100,4,0.04)';"
+                        >
+                            <i class="fas fa-sticky-note"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -607,6 +617,15 @@ document.addEventListener("DOMContentLoaded", function () {
         addUpdateEventListeners();
         addInputChangeEventListeners();
         addDescriptionEventListeners();
+        
+        // Attach note event listeners AFTER rendering table
+        document.querySelectorAll('.note-btn').forEach(btn => {
+            btn.onclick = function() {
+                const id_input = btn.getAttribute('data-id');
+                const table_source = btn.getAttribute('data-table-source');
+                openNoteModal(id_input, table_source);
+            };
+        });
     }
 
     function getBadgeClass(status) {
@@ -676,7 +695,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     async function fetchReferenceData() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/references");
+            const response = await fetch("http://100.124.58.32:5000/api/references");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -739,7 +758,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get_link_foto/${id_input}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get_link_foto/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -821,7 +840,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchLayoutLink(id_input) {
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
             const data = await response.json();
     
             if (response.ok && data.length > 0) {
@@ -836,7 +855,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     async function fetchNamaKet(idInput) {
-        const baseUrl = "http://100.117.80.112:5000"; // Sesuaikan dengan URL API kamu
+        const baseUrl = "http://100.124.58.32:5000"; // Sesuaikan dengan URL API kamu
         const url = `${baseUrl}/api/get_nama_ket/${idInput}`;
     
         try {
@@ -922,7 +941,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Remove updateOrderWithConfirmation function as it's no longer needed
 
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
         
         if (!id_input || !column || value === undefined || value === null) {
             showResultPopup("ID Input, Column, atau Value tidak valid!", true);
@@ -998,7 +1017,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
         
         if (!id_input || !column) {
             showResultPopup("ID Input atau Column tidak valid!", true);

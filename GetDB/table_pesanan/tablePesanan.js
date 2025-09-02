@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchOrders() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/get-orders");
+            const response = await fetch("http://100.124.58.32:5000/api/get-orders");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -502,6 +502,16 @@ function filterOrders() {
                     <div style="display: flex; gap: 10px; justify-content: center;">
                         <button class="delete-icon" data-id="${order.id_input}"><i class="fas fa-trash-alt"></i></button>
                         <button class="desc-table" data-id="${order.id_input}"><i class="fas fa-info-circle"></i></button>
+                        <button class="note-btn" 
+                            data-id="${order.id_input}" 
+                            data-table-source="table_pesanan"
+                            title="Note"
+                            style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; border-radius: 6px; padding: 6px 10px; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(133,100,4,0.04); cursor: pointer;"
+                            onmouseover="this.style.background='#fff3cd'; this.style.boxShadow='0 2px 6px rgba(133,100,4,0.10)';"
+                            onmouseout="this.style.background='#fff3cd'; this.style.boxShadow='0 1px 2px rgba(133,100,4,0.04)';"
+                        >
+                            <i class="fas fa-sticky-note"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -511,6 +521,15 @@ function filterOrders() {
         addUpdateEventListeners();
         addInputChangeEventListeners();
         addDescriptionEventListeners();
+        
+        // Attach note event listeners AFTER rendering table
+        document.querySelectorAll('.note-btn').forEach(btn => {
+            btn.onclick = function() {
+                const id_input = btn.getAttribute('data-id');
+                const table_source = btn.getAttribute('data-table-source');
+                openNoteModal(id_input, table_source);
+            };
+        });
     }
 
     
@@ -594,7 +613,7 @@ function filterOrders() {
     async function fetchSortedOrders() {
         try {
             console.log("Fetching sorted orders...");
-            const response = await fetch('http://100.117.80.112:5000/api/get_sorted_orders'); 
+            const response = await fetch('http://100.124.58.32:5000/api/get_sorted_orders'); 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -676,7 +695,7 @@ function filterOrders() {
 
     async function fetchReferenceData() {
     try {
-        const response = await fetch("http://100.117.80.112:5000/api/references");
+        const response = await fetch("http://100.124.58.32:5000/api/references");
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -742,7 +761,7 @@ function filterOrders() {
         }
     
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get_link_foto/${id_input}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get_link_foto/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -833,7 +852,7 @@ function filterOrders() {
 
 
     async function fetchNamaKet(idInput) {
-        const baseUrl = "http://100.117.80.112:5000"; // Sesuaikan dengan URL API kamu
+        const baseUrl = "http://100.124.58.32:5000"; // Sesuaikan dengan URL API kamu
         const url = `${baseUrl}/api/get_nama_ket/${idInput}`;
     
         try {
@@ -906,7 +925,7 @@ function filterOrders() {
         confirmDeleteBtn.disabled = true;
         confirmDeleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
     
-        fetch(`http://100.117.80.112:5000/api/delete-order/${encodeURIComponent(selectedOrderId.trim())}`, { 
+        fetch(`http://100.124.58.32:5000/api/delete-order/${encodeURIComponent(selectedOrderId.trim())}`, { 
             method: "DELETE",
             headers: { "Content-Type": "application/json" }
         })
@@ -1071,7 +1090,7 @@ function filterOrders() {
     
     function updateOrder(id_input, column, value) {
         // Use the correct endpoint based on the Python API
-        const endpoint = "http://100.117.80.112:5000/api/update-print-status-layout";
+        const endpoint = "http://100.124.58.32:5000/api/update-print-status-layout";
     
         const confirmUpdateBtn = document.getElementById("confirmUpdateBtn");
         confirmUpdateBtn.disabled = true;
