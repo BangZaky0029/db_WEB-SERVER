@@ -27,6 +27,18 @@ function openNoteModal(id_input, table_source) {
 
 // Create note modal HTML structure
 function createNoteModal() {
+    // Add mention styles if not already added
+    if (!document.getElementById('mentionStyles')) {
+        const link = document.createElement('link');
+        link.id = 'mentionStyles';
+        link.rel = 'stylesheet';
+        // Determine correct path based on current location
+        const currentPath = window.location.pathname;
+        const cssPath = currentPath.includes('/table_') ? '../shared/mentionStyles.css' : 'shared/mentionStyles.css';
+        link.href = cssPath;
+        document.head.appendChild(link);
+    }
+    
     const modalHTML = `
         <div id="noteModal" class="note-modal" style="display: none;">
             <div class="note-modal-content">
@@ -45,7 +57,10 @@ function createNoteModal() {
                         <h4>Add New Note</h4>
                         <div class="form-group">
                             <label for="noteTitle">Title:</label>
-                            <input type="text" id="noteTitle" placeholder="Enter note title..." maxlength="100">
+                            <div class="mention-input-container">
+                                <input type="text" id="noteTitle" placeholder="Enter note title..." maxlength="100">
+                                <div id="mentionDropdown" class="mention-dropdown" style="display: none;"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="noteContent">Content:</label>
@@ -93,6 +108,11 @@ function createNoteModal() {
     
     // Add event listeners
     setupNoteModalEventListeners();
+    
+    // Setup mention functionality
+    setTimeout(() => {
+        setupMentionFunctionality();
+    }, 100);
 }
 
 // Setup event listeners for note modal
@@ -149,7 +169,7 @@ async function loadNotes(id_input, table_source) {
         document.getElementById('noteModalTableSource').textContent = table_source;
         
         // Use the new endpoint that gets all notes for the id_input
-        const response = await fetch(`http://100.117.80.112:5000/api/notes/${id_input}`);
+        const response = await fetch(`http://100.124.58.32:5000/api/notes/${id_input}`);
         
         if (response.ok) {
             const data = await response.json();
@@ -242,6 +262,155 @@ function renderNotes() {
     });
 }
 
+// Mention functionality
+const mentionUsers = ['Vinka', 'Desi', 'David', 'Ikbal', 'Imam', 'Untung'];
+let currentMentionIndex = -1;
+let mentionStartPos = -1;
+
+// Setup mention functionality for title input
+function setupMentionFunctionality() {
+    const titleInput = document.getElementById('noteTitle');
+    const dropdown = document.getElementById('mentionDropdown');
+    
+    titleInput.addEventListener('input', handleMentionInput);
+    titleInput.addEventListener('keydown', handleMentionKeydown);
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.mention-input-container')) {
+            dropdown.style.display = 'none';
+        }
+    });
+}
+
+// Handle input for mention detection
+function handleMentionInput(e) {
+    const input = e.target;
+    const value = input.value;
+    const cursorPos = input.selectionStart;
+    const dropdown = document.getElementById('mentionDropdown');
+    
+    // Find @ symbol before cursor
+    let atPos = -1;
+    for (let i = cursorPos - 1; i >= 0; i--) {
+        if (value[i] === '@') {
+            atPos = i;
+            break;
+        }
+        if (value[i] === ' ') {
+            break;
+        }
+    }
+    
+    if (atPos !== -1) {
+        const searchText = value.substring(atPos + 1, cursorPos).toLowerCase();
+        const filteredUsers = mentionUsers.filter(user => 
+            user.toLowerCase().includes(searchText)
+        );
+        
+        if (filteredUsers.length > 0) {
+            showMentionDropdown(filteredUsers, atPos);
+            mentionStartPos = atPos;
+        } else {
+            dropdown.style.display = 'none';
+        }
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Handle keydown for mention navigation
+function handleMentionKeydown(e) {
+    const dropdown = document.getElementById('mentionDropdown');
+    
+    if (dropdown.style.display === 'none') return;
+    
+    const items = dropdown.querySelectorAll('.mention-item');
+    
+    switch (e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            currentMentionIndex = Math.min(currentMentionIndex + 1, items.length - 1);
+            updateMentionSelection(items);
+            break;
+        case 'ArrowUp':
+            e.preventDefault();
+            currentMentionIndex = Math.max(currentMentionIndex - 1, 0);
+            updateMentionSelection(items);
+            break;
+        case 'Enter':
+        case 'Tab':
+            e.preventDefault();
+            if (currentMentionIndex >= 0 && items[currentMentionIndex]) {
+                selectMention(items[currentMentionIndex].textContent);
+            }
+            break;
+        case 'Escape':
+            dropdown.style.display = 'none';
+            currentMentionIndex = -1;
+            break;
+    }
+}
+
+// Show mention dropdown
+function showMentionDropdown(users, atPos) {
+    const dropdown = document.getElementById('mentionDropdown');
+    const input = document.getElementById('noteTitle');
+    
+    dropdown.innerHTML = '';
+    currentMentionIndex = -1;
+    
+    users.forEach((user, index) => {
+        const item = document.createElement('div');
+        item.className = 'mention-item';
+        item.textContent = user;
+        item.onclick = () => selectMention(user);
+        dropdown.appendChild(item);
+    });
+    
+    // Position dropdown
+    const inputRect = input.getBoundingClientRect();
+    dropdown.style.display = 'block';
+    dropdown.style.top = (inputRect.bottom + window.scrollY) + 'px';
+    dropdown.style.left = inputRect.left + 'px';
+    dropdown.style.width = inputRect.width + 'px';
+}
+
+// Update mention selection highlight
+function updateMentionSelection(items) {
+    items.forEach((item, index) => {
+        item.classList.toggle('selected', index === currentMentionIndex);
+    });
+}
+
+// Select a mention
+function selectMention(userName) {
+    const input = document.getElementById('noteTitle');
+    const value = input.value;
+    const cursorPos = input.selectionStart;
+    
+    // Find the end of the current mention text
+    let endPos = cursorPos;
+    while (endPos < value.length && value[endPos] !== ' ') {
+        endPos++;
+    }
+    
+    // Replace the mention text
+    const newValue = value.substring(0, mentionStartPos) + '@' + userName + value.substring(endPos);
+    input.value = newValue;
+    
+    // Set cursor position after the mention
+    const newCursorPos = mentionStartPos + userName.length + 1;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    
+    // Hide dropdown
+    document.getElementById('mentionDropdown').style.display = 'none';
+    currentMentionIndex = -1;
+    
+    // Focus back to input
+    input.focus();
+}
+
 // Add new note
 async function addNewNote() {
     const title = document.getElementById('noteTitle').value.trim();
@@ -277,7 +446,7 @@ async function addNewNote() {
      
      // Verify PIN first
      try {
-         const pinResponse = await fetch('http://100.117.80.112:5000/api/auth/verify-pin', {
+         const pinResponse = await fetch('http://100.124.58.32:5000/api/auth/verify-pin', {
              method: 'POST',
              headers: {
                  'Content-Type': 'application/json'
@@ -305,7 +474,7 @@ async function addNewNote() {
      }
      
      try {
-         const response = await fetch('http://100.117.80.112:5000/api/notes', {
+         const response = await fetch('http://100.124.58.32:5000/api/notes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -411,7 +580,7 @@ async function updateNote(noteId) {
     
     // Verify PIN first
     try {
-        const pinResponse = await fetch('http://100.117.80.112:5000/api/auth/verify-pin', {
+        const pinResponse = await fetch('http://100.124.58.32:5000/api/auth/verify-pin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -439,7 +608,7 @@ async function updateNote(noteId) {
      }
     
     try {
-        const response = await fetch(`http://100.117.80.112:5000/api/notes/${noteId}`, {
+        const response = await fetch(`http://100.124.58.32:5000/api/notes/${noteId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -528,3 +697,195 @@ function showNotification(message, type = 'info') {
         }
     }, 3000);
 }
+
+// Enhanced Mention Dropdown Functions
+class MentionDropdownEnhancer {
+    constructor() {
+        this.typingTimer = null;
+        this.isTyping = false;
+        this.init();
+    }
+    
+    init() {
+        // Add event listeners for enhanced effects
+        document.addEventListener('DOMContentLoaded', () => {
+            this.setupMentionEnhancements();
+        });
+    }
+    
+    setupMentionEnhancements() {
+        // Setup typing indicator
+        const mentionInputs = document.querySelectorAll('.mention-input-container input');
+        mentionInputs.forEach(input => {
+            input.addEventListener('input', (e) => this.handleTyping(e));
+            input.addEventListener('focus', (e) => this.handleFocus(e));
+            input.addEventListener('blur', (e) => this.handleBlur(e));
+        });
+        
+        // Setup dropdown enhancements
+        this.observeDropdowns();
+    }
+    
+    handleTyping(event) {
+        const container = event.target.closest('.mention-input-container');
+        if (!container) return;
+        
+        // Add typing class
+        container.classList.add('typing');
+        this.isTyping = true;
+        
+        // Clear existing timer
+        if (this.typingTimer) {
+            clearTimeout(this.typingTimer);
+        }
+        
+        // Remove typing class after delay
+        this.typingTimer = setTimeout(() => {
+            container.classList.remove('typing');
+            this.isTyping = false;
+        }, 1000);
+    }
+    
+    handleFocus(event) {
+        const container = event.target.closest('.mention-input-container');
+        if (container) {
+            container.classList.add('focused');
+        }
+    }
+    
+    handleBlur(event) {
+        const container = event.target.closest('.mention-input-container');
+        if (container) {
+            container.classList.remove('focused', 'typing');
+        }
+    }
+    
+    observeDropdowns() {
+        // Create observer for dropdown appearance
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.classList && node.classList.contains('mention-dropdown')) {
+                        this.enhanceDropdown(node);
+                    }
+                });
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    enhanceDropdown(dropdown) {
+        // Add floating animation
+        setTimeout(() => {
+            dropdown.classList.add('floating');
+        }, 500);
+        
+        // Setup ripple effect for items
+        const items = dropdown.querySelectorAll('.mention-item');
+        items.forEach((item, index) => {
+            // Add bounce animation for new items
+            setTimeout(() => {
+                item.classList.add('new-item');
+            }, index * 50);
+            
+            // Add ripple effect on click
+            item.addEventListener('click', (e) => this.createRipple(e, item));
+            
+            // Remove new-item class after animation
+            setTimeout(() => {
+                item.classList.remove('new-item');
+            }, 500 + (index * 50));
+        });
+        
+        // Add scroll enhancement
+        this.enhanceScrolling(dropdown);
+    }
+    
+    createRipple(event, element) {
+        // Remove existing ripple
+        element.classList.remove('ripple');
+        
+        // Add ripple class
+        setTimeout(() => {
+            element.classList.add('ripple');
+        }, 10);
+        
+        // Remove ripple class after animation
+        setTimeout(() => {
+            element.classList.remove('ripple');
+        }, 600);
+    }
+    
+    enhanceScrolling(dropdown) {
+        let isScrolling = false;
+        
+        dropdown.addEventListener('scroll', () => {
+            if (!isScrolling) {
+                dropdown.classList.add('scrolling');
+                isScrolling = true;
+            }
+            
+            // Clear timeout
+            clearTimeout(dropdown.scrollTimeout);
+            
+            // Set timeout to remove scrolling class
+            dropdown.scrollTimeout = setTimeout(() => {
+                dropdown.classList.remove('scrolling');
+                isScrolling = false;
+            }, 150);
+        });
+    }
+    
+    // Utility methods for different dropdown styles
+    setDropdownStyle(dropdown, style) {
+        // Remove existing style classes
+        dropdown.classList.remove('style-minimal', 'style-glass', 'style-neon', 'gradient-border');
+        
+        // Add new style
+        if (style && style !== 'default') {
+            dropdown.classList.add(`style-${style}`);
+        }
+    }
+    
+    addGradientBorder(dropdown) {
+        dropdown.classList.add('gradient-border');
+    }
+    
+    showDropdownWithEffect(dropdown, effect = 'default') {
+        dropdown.style.display = 'block';
+        
+        switch (effect) {
+            case 'bounce':
+                dropdown.style.animation = 'dropdownSlideIn 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                break;
+            case 'fade':
+                dropdown.style.animation = 'fadeIn 0.3s ease-out';
+                break;
+            case 'slide':
+                dropdown.style.animation = 'dropdownSlideIn 0.25s ease-out';
+                break;
+            default:
+                dropdown.style.animation = 'dropdownSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        }
+    }
+    
+    hideDropdownWithEffect(dropdown, effect = 'default') {
+        dropdown.classList.add('closing');
+        
+        setTimeout(() => {
+            dropdown.style.display = 'none';
+            dropdown.classList.remove('closing');
+        }, 200);
+    }
+}
+
+// Initialize the enhancer
+const mentionEnhancer = new MentionDropdownEnhancer();
+
+// Export for global use
+window.MentionDropdownEnhancer = MentionDropdownEnhancer;
+window.mentionEnhancer = mentionEnhancer;
