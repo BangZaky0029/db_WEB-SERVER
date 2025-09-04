@@ -492,6 +492,25 @@ async function addNewNote() {
         
         if (response.ok) {
             showNotification('Note added successfully', 'success');
+            
+            // Check if the note title contains a mention (@username)
+            if (title.includes('@')) {
+                // Extract mentioned users
+                const mentionedUsers = [];
+                mentionUsers.forEach(user => {
+                    if (title.includes('@' + user)) {
+                        mentionedUsers.push(user);
+                    }
+                });
+                
+                if (mentionedUsers.length > 0) {
+                    // Show WhatsApp notification for each mentioned user
+                    mentionedUsers.forEach(user => {
+                        showWhatsAppNotification(user);
+                    });
+                }
+            }
+            
             clearNoteForm();
             // Reload notes
             loadNotes(currentNoteData.id_input, currentNoteData.table_source);
@@ -623,6 +642,25 @@ async function updateNote(noteId) {
         
         if (response.ok) {
             showNotification('Note updated successfully', 'success');
+            
+            // Check if the note title contains a mention (@username)
+            if (title.includes('@')) {
+                // Extract mentioned users
+                const mentionedUsers = [];
+                mentionUsers.forEach(user => {
+                    if (title.includes('@' + user)) {
+                        mentionedUsers.push(user);
+                    }
+                });
+                
+                if (mentionedUsers.length > 0) {
+                    // Show WhatsApp notification for each mentioned user
+                    mentionedUsers.forEach(user => {
+                        showWhatsAppNotification(user);
+                    });
+                }
+            }
+            
             cancelEdit();
             // Reload notes
             loadNotes(currentNoteData.id_input, currentNoteData.table_source);
@@ -696,6 +734,42 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
+}
+
+// Show WhatsApp notification
+function showWhatsAppNotification(userName) {
+    // Create WhatsApp notification element
+    const waNotification = document.createElement('div');
+    waNotification.id = 'waNotification';
+    waNotification.className = 'whatsapp-notification';
+    waNotification.innerHTML = `
+        <div class="whatsapp-icon">
+            <i class="fab fa-whatsapp"></i>
+        </div>
+        <div class="whatsapp-message">
+            <span>Pesan Terkirim Ke WA (${userName})</span>
+        </div>
+    `;
+    
+    document.body.appendChild(waNotification);
+    
+    // Add animation class after a small delay
+    setTimeout(() => {
+        waNotification.classList.add('show');
+    }, 10);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        waNotification.classList.remove('show');
+        waNotification.classList.add('hide');
+        
+        // Remove from DOM after animation completes
+        setTimeout(() => {
+            if (waNotification.parentNode) {
+                waNotification.remove();
+            }
+        }, 500);
+    }, 4000);
 }
 
 // Enhanced Mention Dropdown Functions

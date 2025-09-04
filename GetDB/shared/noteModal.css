@@ -11,6 +11,44 @@
     animation: fadeIn 0.3s ease-in-out;
 }
 
+/* WhatsApp Notification Styles */
+.whatsapp-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    z-index: 10000;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.4s ease-out, opacity 0.3s ease;
+}
+
+.whatsapp-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.whatsapp-notification.hide {
+    transform: translateX(120%);
+    opacity: 0;
+}
+
+.whatsapp-icon {
+    margin-right: 12px;
+    font-size: 24px;
+}
+
+.whatsapp-message {
+    font-weight: 500;
+    font-size: 14px;
+}
+
 .note-modal-content {
     position: relative;
     background-color: #ffffff;
