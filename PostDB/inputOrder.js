@@ -498,34 +498,36 @@ document.addEventListener('DOMContentLoaded', function() {
                         ✅ ${data.message}
                     </div>`;
                 // Reset form on success
-                orderForm.reset();
-                selectedProductId = null;
-                selectedType = null;
-                selectedMaterial = null;
-                selectedFile = null;
-                
-                // Reset UI elements
-                materialButtons.forEach(btn => btn.classList.remove('active'));
-                typeRadios.forEach(radio => radio.checked = false);
-                platformRadios.forEach(radio => radio.checked = false);
-                
-                if (productSelect) {
-                    productSelect.innerHTML = '<option value="">-- Pilih Produk --</option>';
-                }
-                
-                if (productSelectionGroup) {
-                    productSelectionGroup.style.display = 'none';
-                }
-                
-                if (previewImage) {
-                    previewImage.style.display = 'none';
-                    previewImage.src = '';
-                }
-                
-                // Reset keterangan
-                if (namaKet) {
-                    namaKet.value = ` Nama                  : \n Type                    : \n Motif/Kode         : \n Keterangan       : \n Note : DESAIN KIRIM ADMIN DULU`;
-                }
+                setTimeout(() => {
+                    orderForm.reset();
+                    selectedProductId = null;
+                    selectedType = null;
+                    selectedMaterial = null;
+                    selectedFile = null;
+                    
+                    // Reset UI elements
+                    materialButtons.forEach(btn => btn.classList.remove('active'));
+                    typeRadios.forEach(radio => radio.checked = false);
+                    platformRadios.forEach(radio => radio.checked = false);
+                    
+                    if (productSelect) {
+                        productSelect.innerHTML = '<option value="">-- Pilih Produk --</option>';
+                    }
+                    
+                    if (productSelectionGroup) {
+                        productSelectionGroup.style.display = 'none';
+                    }
+                    
+                    if (previewImage) {
+                        previewImage.style.display = 'none';
+                        previewImage.src = '';
+                    }
+                    
+                    // Reset keterangan
+                    if (namaKet) {
+                        namaKet.value = ` Nama                  : \n Type                    : \n Motif/Kode         : \n Keterangan       : \n Note : DESAIN KIRIM ADMIN DULU`;
+                    }
+                }, 500); // Delay reset to prevent refresh issues
             } else {
                 responseMessage.innerHTML = `
                     <div class="alert alert-warning" style="
