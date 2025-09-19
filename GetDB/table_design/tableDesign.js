@@ -1677,7 +1677,7 @@ function showTopNotification(message) {
     async function fetchLinkFoto(id_input) {
         if (!id_input || id_input === "-") {
             console.warn("ID tidak valid:", id_input);
-            return "-";
+            return [];
         }
     
         try {
@@ -1689,16 +1689,22 @@ function showTopNotification(message) {
             
             const data = await response.json();
     
-            if (!data || !data.data || typeof data.data.link !== "string") {
-                console.warn("Format response tidak valid atau link kosong:", data);
-                return "-";
+            // Cek apakah response berisi array foto
+            if (data && data.data && Array.isArray(data.data.links)) {
+                return data.data.links; // Return array foto
             }
             
-            return data.data.link;
+            // Backward compatibility untuk API lama yang hanya mengembalikan satu link
+            if (data && data.data && typeof data.data.link === "string") {
+                return [data.data.link]; // Return array dengan satu foto
+            }
+            
+            console.warn("Format response tidak valid atau link kosong:", data);
+            return [];
     
         } catch (error) {
             console.error("Error fetching link foto:", error);
-            return "-";
+            return [];
         }
     }
 
@@ -1731,16 +1737,29 @@ function showTopNotification(message) {
                     : "-"
                 }</td></tr>
                 <tr><th>Link Foto</th><td>
-                    ${linkFoto && linkFoto !== "-" 
+                    ${Array.isArray(linkFoto) && linkFoto.length > 0 
                         ? `<div class="d-flex flex-column align-items-start gap-2">
-                            <div class="image-thumbnail mb-2">
-                                <img src="${linkFoto}" alt="Order Photo" 
-                                     onclick="window.open('${linkFoto}', '_blank')"
-                                     onerror="this.onerror=null; this.src='path/to/fallback-image.png';">
+                            <div class="d-flex flex-wrap gap-2">
+                                ${linkFoto.map(foto => `
+                                    <div class="image-thumbnail mb-2">
+                                        <img src="${foto}" alt="Order Photo" 
+                                             onclick="window.open('${foto}', '_blank')"
+                                             onerror="this.onerror=null; this.src='path/to/fallback-image.png';">
+                                    </div>
+                                `).join('')}
                             </div>
-                            <a href="${linkFoto}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-image"></i> Lihat Foto
-                            </a>
+                            ${linkFoto.length === 1 
+                                ? `<a href="${linkFoto[0]}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-image"></i> Lihat Foto
+                                  </a>` 
+                                : `<div class="d-flex flex-wrap gap-2">
+                                    ${linkFoto.map((foto, index) => `
+                                        <a href="${foto}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-image"></i> Foto ${index + 1}
+                                        </a>
+                                    `).join('')}
+                                  </div>`
+                            }
                            </div>`
                         : "Tidak Tersedia"}
                     </td></tr>
