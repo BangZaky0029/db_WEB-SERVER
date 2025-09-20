@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
         { id_produk: 47078, nama_produk: "Miranda Bag", id_bahan: 46001},
         { id_produk: 47079, nama_produk: "Laurent Slingbag", id_bahan: 46001},
         { id_produk: 47080, nama_produk: "Tania", id_bahan: 46001},
-        { id_produk: 47081, nama_produk: "Dalina", id_bahan: 46001}
+        { id_produk: 47081, nama_produk: "Dalina", id_bahan: 46001},
+        { id_produk: 47082, nama_produk: "Paddle Bag", id_bahan: 46001},
     ];
     
 
