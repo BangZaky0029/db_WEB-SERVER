@@ -444,7 +444,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     id_produk: parseInt(selectedProductId),
                     id_type: parseInt(selectedType),
                     nama_ket: namaKetValue,
-                    link: link
+                    link: link,
+                    OUT_DLN: "NORMAL" // Menambahkan field OUT_DLN dengan nilai default "NORMAL"
                 };
                 
                 // Send data with JSON
