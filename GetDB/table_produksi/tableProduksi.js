@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault(); // Hindari reload form
         
             const formData = new FormData(this);
-            const response = await fetch("http://100.124.58.32:5000/api/get_table_prod", {
+            const response = await fetch("http://100.117.80.112:5000/api/get_table_prod", {
                 method: "POST",
                 body: JSON.stringify(Object.fromEntries(formData)),
                 headers: { "Content-Type": "application/json" },
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update fetchOrders to pass isSearching parameter
     async function fetchOrders() {
         try {
-            const response = await fetch("http://100.124.58.32:5000/api/get_table_prod");
+            const response = await fetch("http://100.117.80.112:5000/api/get_table_prod");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -716,7 +716,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     async function fetchReferenceData() {
         try {
-            const response = await fetch("http://100.124.58.32:5000/api/references");
+            const response = await fetch("http://100.117.80.112:5000/api/references");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -779,7 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const response = await fetch(`http://100.124.58.32:5000/api/get_link_foto/${id_input}`);
+            const response = await fetch(`http://100.117.80.112:5000/api/get_link_foto/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -861,7 +861,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchLayoutLink(id_input) {
         try {
-            const response = await fetch(`http://100.124.58.32:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
+            const response = await fetch(`http://100.117.80.112:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
             const data = await response.json();
     
             if (response.ok && data.length > 0) {
@@ -876,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     async function fetchNamaKet(idInput) {
-        const baseUrl = "http://100.124.58.32:5000"; // Sesuaikan dengan URL API kamu
+        const baseUrl = "http://100.117.80.112:5000"; // Sesuaikan dengan URL API kamu
         const url = `${baseUrl}/api/get_nama_ket/${idInput}`;
     
         try {
@@ -962,7 +962,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Remove updateOrderWithConfirmation function as it's no longer needed
 
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
         
         if (!id_input || !column) {
             showResultPopup("ID Input atau Column tidak valid!", true);
@@ -1070,7 +1070,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
         
         if (!id_input || !column) {
             showResultPopup("ID Input atau Column tidak valid!", true);
