@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/get-input-table", {
+            const response = await fetch("http://100.124.58.32:5000/api/get-input-table", {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

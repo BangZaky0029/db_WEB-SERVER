@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Send data with FormData (multipart/form-data)
-                fetch('http://100.117.80.112:5000/api/input-order', {
+                fetch('http://100.124.58.32:5000/api/input-order', {
                     method: 'POST',
                     body: formData
                 })
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 
                 // Send data with JSON
-                fetch('http://100.117.80.112:5000/api/input-order', {
+                fetch('http://100.124.58.32:5000/api/input-order', {
                     method: 'POST',
                 
                     headers: {

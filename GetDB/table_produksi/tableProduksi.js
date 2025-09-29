@@ -70,14 +70,16 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchOrders();
     }
 
-    document.getElementById("inputForm").addEventListener("submit", async function (event) {
-        event.preventDefault(); // Hindari reload form
-    
-        const formData = new FormData(this);
-        const response = await fetch("http://100.117.80.112:5000/api/get_table_prod", {
-            method: "POST",
-            body: JSON.stringify(Object.fromEntries(formData)),
-            headers: { "Content-Type": "application/json" },
+    const inputForm = document.getElementById("inputForm");
+    if (inputForm) {
+        inputForm.addEventListener("submit", async function (event) {
+            event.preventDefault(); // Hindari reload form
+        
+            const formData = new FormData(this);
+            const response = await fetch("http://100.124.58.32:5000/api/get_table_prod", {
+                method: "POST",
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: { "Content-Type": "application/json" },
         });
     
         const result = await response.json();
@@ -89,12 +91,12 @@ document.addEventListener("DOMContentLoaded", function () {
             showResultPopup("Gagal menambahkan data: " + (result.message || "Unknown error"), true);
         }
     });
-    
+}    
 
     // Update fetchOrders to pass isSearching parameter
     async function fetchOrders() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/get_table_prod");
+            const response = await fetch("http://100.124.58.32:5000/api/get_table_prod");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -546,6 +548,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderOrdersTable(orders, isSearching = true) {
         const tableBody = document.getElementById("table-body");
         tableBody.innerHTML = "";
+        
+        if (!orders || orders.length === 0) {
+            const emptyRow = document.createElement("tr");
+            emptyRow.innerHTML = `<td colspan="14" class="text-center">Tidak ada data pesanan${isSearching ? ' yang sesuai dengan pencarian' : ''}</td>`;
+            tableBody.appendChild(emptyRow);
+            return;
+        }
     
         orders.forEach(order => {
             const row = document.createElement("tr");
@@ -584,6 +593,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     </select>
                 </td>
                 <td>${formatTanggal(highlightDeadline(order.deadline))}</td>
+                <td>
+                    <select class="out-dln-dropdown" data-id="${order.id_input}" data-column="out_dln" style="background-color: #dc3545; color: white; font-weight: bold; border: none; padding: 5px; border-radius: 4px;">
+                        <option value="-" ${order.OUT_DLN === '-' ? 'selected' : ''}>-</option>
+                        <option value="Marketing" ${order.OUT_DLN === 'Marketing' ? 'selected' : ''}>Marketing</option>
+                        <option value="Customer" ${order.OUT_DLN === 'Customer' ? 'selected' : ''}>Customer</option>
+                        <option value="Gambar" ${order.OUT_DLN === 'Gambar' ? 'selected' : ''}>Gambar</option>
+                        <option value="Penjahit" ${order.OUT_DLN === 'Penjahit' ? 'selected' : ''}>Penjahit</option>
+                        <option value="Briefing" ${order.OUT_DLN === 'Briefing' ? 'selected' : ''}>Briefing</option>
+                        <option value="Designer" ${order.OUT_DLN === 'Designer' ? 'selected' : ''}>Designer</option>
+                        <option value="Material" ${order.OUT_DLN === 'Material' ? 'selected' : ''}>Material</option>
+                    </select>
+                </td>
                 <td>
                     <select class="status-produksi" data-id="${order.id_input}" data-column="status_produksi">
                         <option value="-" ${order.status_produksi === '-' ? 'selected' : ''}>-</option>
@@ -695,7 +716,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     async function fetchReferenceData() {
         try {
-            const response = await fetch("http://100.117.80.112:5000/api/references");
+            const response = await fetch("http://100.124.58.32:5000/api/references");
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -758,7 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get_link_foto/${id_input}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get_link_foto/${id_input}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -840,7 +861,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchLayoutLink(id_input) {
         try {
-            const response = await fetch(`http://100.117.80.112:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
+            const response = await fetch(`http://100.124.58.32:5000/api/get-layout?id_input=${encodeURIComponent(id_input)}`);
             const data = await response.json();
     
             if (response.ok && data.length > 0) {
@@ -855,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     async function fetchNamaKet(idInput) {
-        const baseUrl = "http://100.117.80.112:5000"; // Sesuaikan dengan URL API kamu
+        const baseUrl = "http://100.124.58.32:5000"; // Sesuaikan dengan URL API kamu
         const url = `${baseUrl}/api/get_nama_ket/${idInput}`;
     
         try {
@@ -941,17 +962,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // Remove updateOrderWithConfirmation function as it's no longer needed
 
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
         
-        if (!id_input || !column || value === undefined || value === null) {
-            showResultPopup("ID Input, Column, atau Value tidak valid!", true);
+        if (!id_input || !column) {
+            showResultPopup("ID Input atau Column tidak valid!", true);
             return;
+        }
+
+        // Handle empty selections for penjahit and qc
+        if ((column === "penjahit" || column === "qc") && !value) {
+            value = null; // Set to null instead of empty string
         }
 
         const columnMapping = {
             "penjahit": "id_penjahit",
             "qc": "id_qc",
-            "status_produksi": "status_produksi"
+            "status_produksi": "status_produksi",
+            "out_dln": "OUT_DLN"
         };
         
         const apiParam = columnMapping[column];
@@ -975,11 +1002,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         fetch(endpoint, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
             body: JSON.stringify(requestBody),
             signal: controller.signal
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Update failed');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === "success" || data.message) {
                 // Update local data immediately
@@ -988,6 +1025,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (column === 'penjahit') orderToUpdate.id_penjahit = value;
                     else if (column === 'qc') orderToUpdate.id_qc = value;
                     else if (column === 'status_produksi') orderToUpdate.status_produksi = value;
+                    else if (column === 'out_dln') orderToUpdate.OUT_DLN = value;
+                    
+                    // Hide row if status is DONE
+                    if (column === 'status_produksi' && value === 'DONE' && !showDoneOrders) {
+                        const row = document.querySelector(`tr:has(select[data-id="${id_input}"]`);
+                        if (row) {
+                            row.classList.add('done-status-row');
+                            row.style.display = 'none';
+                        }
+                    }
                 }
 
                 // Update filtered orders if they exist
@@ -997,9 +1044,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (column === 'penjahit') filteredOrderToUpdate.id_penjahit = value;
                         else if (column === 'qc') filteredOrderToUpdate.id_qc = value;
                         else if (column === 'status_produksi') filteredOrderToUpdate.status_produksi = value;
+                        else if (column === 'out_dln') filteredOrderToUpdate.OUT_DLN = value;
                     }
                 }
 
+                // Update UI immediately without fetching
                 renderOrdersTable(paginateOrders(filteredOrders.length > 0 ? filteredOrders : allOrders));
                 showResultPopup(`✅ Update berhasil: ${column} -> ${value}`);
                 
@@ -1012,12 +1061,16 @@ document.addEventListener("DOMContentLoaded", function () {
             showResultPopup(`Terjadi kesalahan saat update: ${error.message}`, true);
         })
         .finally(() => {
+            if (typeof confirmUpdateBtn !== 'undefined') {
+                confirmUpdateBtn.disabled = false;
+                confirmUpdateBtn.innerHTML = 'Ya, Update';
+            }
             window.currentUpdateRequest = null;
         });
     }
     
     function updateOrder(id_input, column, value) {
-        const endpoint = "http://100.117.80.112:5000/api/sync-prod-to-pesanan";
+        const endpoint = "http://100.124.58.32:5000/api/sync-prod-to-pesanan";
         
         if (!id_input || !column) {
             showResultPopup("ID Input atau Column tidak valid!", true);
@@ -1032,7 +1085,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const columnMapping = {
             "penjahit": "id_penjahit",
             "qc": "id_qc",
-            "status_produksi": "status_produksi"
+            "status_produksi": "status_produksi",
+            "out_dln": "OUT_DLN"
         };
         
         const apiParam = columnMapping[column];
