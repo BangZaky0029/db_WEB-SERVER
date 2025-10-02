@@ -139,6 +139,43 @@
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="designButton"><i class="fas fa-paint-brush"></i> Design</button>
+                    <button type="button" class="btn btn-primary" id="generateHeaderButton"><i class="fas fa-paint-brush"></i> Header</button>
+                    
+                    <!-- Modal Pengaturan Font -->
+                    <div class="modal fade" id="fontSettingsModal" tabindex="-1" aria-labelledby="fontSettingsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="fontSettingsModalLabel">Pengaturan Font</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="fontSettingsForm">
+                                        <div class="mb-3">
+                                            <label for="fontColor" class="form-label">Warna Font</label>
+                                            <div class="d-flex">
+                                                <input type="color" class="form-control me-2" id="fontColor" value="#3399FF" style="width: 70px;">
+                                                <input type="text" class="form-control" id="fontColorHex" value="#3399FF" placeholder="Kode Hex (contoh: #73B761)">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="headerFontSize" class="form-label">Ukuran Font Header</label>
+                                            <input type="number" class="form-control" id="headerFontSize" value="35">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="namaFontSize" class="form-label">Ukuran Font Nama</label>
+                                            <input type="number" class="form-control" id="namaFontSize" value="200">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="button" class="btn btn-primary" id="applyFontSettings">Terapkan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>

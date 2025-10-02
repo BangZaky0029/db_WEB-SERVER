@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let pesananColorMap = {}; 
     let usedColorsInPage = new Set();
     let showDoneOrders = false;
+    
+    // Event listener for generateHeaderButton moved to showDescriptionModal function
+    
 
     // Define reference data objects
     let adminList = {};
@@ -87,6 +90,37 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Error initializing app:", error);
             showResultPopup("Gagal memuat aplikasi. Silakan refresh halaman.", true);
+        }
+    }
+    
+    // Function to generate header based on order ID
+    async function generateHeader(orderId) {
+        try {
+            // Show loading indicator
+            showResultPopup("Sedang membuat header...", false);
+            
+            const response = await fetch("http://100.117.80.112:5000/api/header/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: orderId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showResultPopup(`Header berhasil dibuat: ${data.filename}`, false);
+                console.log("Header generation result:", data);
+            } else {
+                showResultPopup(`Gagal membuat header: ${data.message || "Unknown error"}`, true);
+                console.error("Header generation failed:", data);
+            }
+        } catch (error) {
+            console.error("Error generating header:", error);
+            showResultPopup("Terjadi kesalahan saat membuat header.", true);
         }
     }
 
@@ -239,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentPage = pageNum;
                 updateTableDisplay();
             } else {
-                alert(`Halaman tidak valid. Masukkan nomor antara 1 hingga ${totalPages}.`);
+                showResultPopup(`Halaman tidak valid. Masukkan nomor antara 1 hingga ${totalPages}.`, true);
             }
         });
     
@@ -1144,7 +1178,7 @@ document.querySelector('.confirm-bulk-upload')?.addEventListener('click', async 
                     document.execCommand('copy');
                     copied = true;
                 } catch (err2) {
-                    alert('Failed to copy');
+                    showResultPopup('Failed to copy', true);
                 }
                 document.body.removeChild(textarea);
             }
@@ -1583,7 +1617,7 @@ function showTopNotification(message) {
                 if (value) {
                     updateOrderWithConfirmation(id_pesanan, "layout_link", value);
                 } else {
-                    alert("Masukkan link sebelum submit.");
+                    showResultPopup("Masukkan link sebelum submit.", true);
                 }
             });
         });
@@ -1598,7 +1632,7 @@ function showTopNotification(message) {
                 if (link) {
                     window.open(link, "_blank");
                 } else {
-                    alert("Link belum tersedia.");
+                    showResultPopup("Link belum tersedia.", true);
                 }
             });
         });
@@ -1775,10 +1809,225 @@ function showTopNotification(message) {
             const modal = new bootstrap.Modal(orderModal);
             modal.show();
             
+            // Tambahkan event listener untuk tombol Design
+            document.getElementById("designButton").addEventListener("click", function() {
+                // Tampilkan modal pengaturan font
+                const fontSettingsModal = new bootstrap.Modal(document.getElementById('fontSettingsModal'));
+                fontSettingsModal.show();
+                
+                // Sinkronisasi antara color picker dan input hex
+                document.getElementById('fontColor').addEventListener('input', function() {
+                    document.getElementById('fontColorHex').value = this.value;
+                });
+                
+                document.getElementById('fontColorHex').addEventListener('input', function() {
+                    // Validasi format hex
+                    const hexValue = this.value;
+                    if (/^#[0-9A-F]{6}$/i.test(hexValue)) {
+                        document.getElementById('fontColor').value = hexValue;
+                    }
+                });
+                
+                // Simpan data order dan ketNama untuk digunakan nanti
+                document.getElementById('applyFontSettings').onclick = function() {
+                    // Ambil nilai pengaturan font
+                    const fontColor = document.getElementById('fontColorHex').value;
+                    const headerFontSize = parseInt(document.getElementById('headerFontSize').value);
+                    const namaFontSize = parseInt(document.getElementById('namaFontSize').value);
+                    
+                    // Tutup modal pengaturan font
+                    fontSettingsModal.hide();
+                    
+                    // Panggil fungsi handleDesignButtonClick dengan parameter tambahan
+                    handleDesignButtonClickWithFontSettings(order, ketNama, fontColor, headerFontSize, namaFontSize);
+                };
+            });
+            
+            // Tambahkan event listener untuk tombol Header
+            document.getElementById("generateHeaderButton").addEventListener("click", function() {
+                console.log("Header button clicked, order ID:", order.id_input);
+                if (order.id_input) {
+                    generateHeader(order.id_input);
+                } else {
+                    showResultPopup("ID pesanan tidak valid.", true);
+                }
+            });
+            
         } catch (error) {
             console.error("Error showing modal:", error);
             modalBody.innerHTML = `<tr><td colspan="2" class="text-center text-danger">Gagal memuat data pesanan: ${error.message}</td></tr>`;
         }
+    }
+    
+    // Fungsi untuk menangani klik tombol Design
+    function handleDesignButtonClickWithFontSettings(order, ketNama, fontColor, headerFontSize, namaFontSize) {
+        try {
+            // Ekstrak id_input dari order
+            const id_input = order.id_input;
+            if (!id_input) {
+                throw new Error('ID input tidak ditemukan');
+            }
+            
+            // Tampilkan loading notification
+            showTopNotification("Memproses design dengan pengaturan font...", "info");
+            
+            // Langkah 1: Buat file JSON melalui endpoint generate-design-json
+            console.log("Generating JSON file...");
+            
+            // Siapkan data untuk request
+            const requestData = {
+                id_input: id_input,
+                nama_ket: ketNama
+            };
+            
+            fetch('http://100.117.80.112:5000/generate-design-json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(jsonData => {
+                if (jsonData.success) {
+                    showTopNotification(`JSON berhasil dibuat: ${jsonData.message}`, "success");
+                    console.log('JSON data:', jsonData.data);
+                    
+                    // Langkah 2: Gunakan endpoint import-design-json untuk mengirim ke image generator
+                    // Tambahkan parameter font ke request
+                    // JANGAN DIRUBAH ENDPOINT INI..!!!
+                    return fetch('http://100.117.80.112:5000/import-design-json', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            id_input: id_input,
+                            font_color: fontColor,
+                            header_font_size: headerFontSize,
+                            nama_font_size: namaFontSize
+                        })
+                    });
+                } else {
+                    throw new Error(jsonData.message || 'Gagal membuat JSON');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showTopNotification(`Design berhasil dibuat dengan pengaturan font kustom: ${data.message}`, "success");
+                    console.log('Design data:', data);
+                    
+                    // Tutup modal setelah berhasil
+                    const orderModal = document.getElementById("orderModal");
+                    const modalInstance = bootstrap.Modal.getInstance(orderModal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                    
+                    // Refresh tabel setelah berhasil
+                    refreshTable();
+                } else {
+                    throw new Error(data.message || 'Gagal membuat design');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showTopNotification(`Error: ${error.message}`, "error");
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            showTopNotification(`Error: ${error.message}`, "error");
+        }
+    }
+    
+    function handleDesignButtonClick(order, ketNama) {
+        try {
+            // Ekstrak id_input dari order
+            const id_input = order.id_input;
+            if (!id_input) {
+                throw new Error('ID input tidak ditemukan');
+            }
+            
+            // Tampilkan loading notification
+            showTopNotification("Memproses design...", "info");
+            
+            // Langkah 1: Buat file JSON melalui endpoint generate-design-json
+            console.log("Generating JSON file...");
+            
+            // Siapkan data untuk request
+            const requestData = {
+                id_input: id_input,
+                nama_ket: ketNama
+            };
+            // JANGAN DIRUBAH ENDPOINT INI..!!!
+            fetch('http://100.117.80.112:5000/generate-design-json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(jsonData => {
+                if (jsonData.success) {
+                    showTopNotification(`JSON berhasil dibuat: ${jsonData.message}`, "success");
+                    console.log('JSON data:', jsonData.data);
+                    
+                    // Langkah 2: Gunakan endpoint import-design-json untuk mengirim ke image generator
+                    // JANGAN DI RUBAH ENDPOINT INI..!!!
+                    return fetch('http://100.117.80.112:5000/import-design-json', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ id_input: id_input })
+                    });
+                } else {
+                    throw new Error(jsonData.message || 'Gagal membuat JSON');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showTopNotification(`Design berhasil dibuat: ${data.message}`, "success");
+                    console.log('Design data:', data);
+                    
+                    // Tutup modal setelah berhasil
+                    const orderModal = document.getElementById("orderModal");
+                    const modalInstance = bootstrap.Modal.getInstance(orderModal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                } else {
+                    throw new Error(data.message || 'Gagal membuat design');
+                }
+            })
+            .catch(error => {
+                console.error("Error creating design:", error);
+                showTopNotification(`Error: ${error.message}`, "error");
+            });
+        } catch (error) {
+            console.error("Error in design process:", error);
+            showTopNotification(`Error: ${error.message}`, "error");
+        }
+    }
+    
+    // Helper function untuk mendapatkan nama produk
+    function getProdukName(id_produk) {
+        // Implementasi sesuai dengan data produk yang tersedia
+        // Mapping lengkap untuk semua produk
+        
+        console.log(`getProdukName called with id_produk: ${id_produk}`);
+        
+        // Jika id_produk tidak ditemukan atau null/undefined, gunakan nama default
+        if (!id_produk || !produkMap[id_produk]) {
+            console.log(`Produk dengan ID ${id_produk} tidak ditemukan dalam database, menggunakan default`);
+            return "MNK-Medium"; // Default ke MNK-Medium
+        }
+        
+        console.log(`Returning product name: ${produkMap[id_produk]}`);
+        return produkMap[id_produk];
     }
 
     async function fetchNamaKet(idInput) {

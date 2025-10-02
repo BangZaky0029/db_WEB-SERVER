@@ -9,6 +9,68 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .motif-section {
+            margin-bottom: 20px;
+        }
+        .motif-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .motif-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .motif-btn.active, .rs-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .motif-btn:hover, .rs-btn:hover {
+            background-color: #e9ecef;
+        }
+        .rs-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .rs-radio-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            width: 100%;
+        }
+        .rs-radio-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .rs-radio-label:hover {
+            background-color: #e9ecef;
+        }
+        .rs-radio {
+            margin-right: 5px;
+        }
+        /* Styling untuk radio button yang dipilih */
+        input[type="radio"].rs-radio:checked ~ .rs-radio-label,
+        .rs-radio-label:has(input[type="radio"]:checked) {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -57,6 +119,17 @@
                 </div>
             </div>
             
+            <!-- Motif Selection -->
+            <div class="motif-section">
+                <label>Pilih Motif</label>
+                <div class="motif-buttons">
+                    <button type="button" class="motif-btn" data-motif="MNK-Medium">MNK-Medium</button>
+                    <button type="button" class="motif-btn" data-motif="MNK-Large">MNK-Large</button>
+                </div>
+                <div class="rs-buttons" id="rsButtonsContainer" style="display: none; margin-top: 10px;">
+                    <!-- RS buttons will be populated via JS -->
+                </div>
+            </div>
             
             <!-- Product selection (initially hidden, will be populated via JS) -->
             <div class="form-group product-selection" id="productSelectionGroup" style="display: none;">
@@ -136,7 +209,8 @@
  Type               : 
  Size               : 
 
- Nama               : 
+ Nama Depan         : 
+ Nama Belakang      : 
  Motif/Kode         : 
  Keterangan         : 
                 </textarea>

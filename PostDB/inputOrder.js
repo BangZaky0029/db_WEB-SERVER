@@ -7,6 +7,12 @@ document.addEventListener('DOMContentLoaded', function() {
         '1004': 'Untung',
         '1005': 'Ikbal'
     };
+    
+    // Data motif
+    const motifData = {
+        'MNK-Medium': Array.from({length: 42}, (_, i) => `RS-${String(i+1).padStart(2, '0')}`),
+        'MNK-Large': Array.from({length: 42}, (_, i) => `RSL-${String(i+1).padStart(2, '0')}`)
+    };
 
     // DB Data untuk Product
     const products = [
@@ -94,6 +100,88 @@ document.addEventListener('DOMContentLoaded', function() {
         { id_produk: 47082, nama_produk: "Paddle Bag", id_bahan: 46001},
     ];
     
+
+    // Variabel untuk menyimpan motif yang dipilih
+    let selectedMotifType = '';
+    let selectedMotifCode = '';
+    
+    // Event listener untuk tombol motif
+    document.querySelectorAll('.motif-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const motifType = this.getAttribute('data-motif');
+            selectedMotifType = motifType;
+            
+            // Hapus kelas active dari semua tombol
+            document.querySelectorAll('.motif-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Tambahkan kelas active ke tombol yang diklik
+            this.classList.add('active');
+            
+            // Tampilkan tombol RS/RSL
+            displayRSButtons(motifType);
+        });
+    });
+    
+    // Fungsi untuk menampilkan pilihan radio RS/RSL
+    function displayRSButtons(motifType) {
+        const rsContainer = document.getElementById('rsButtonsContainer');
+        rsContainer.innerHTML = '';
+        rsContainer.style.display = 'flex';
+        rsContainer.style.flexWrap = 'wrap';
+        rsContainer.style.gap = '5px';
+        
+        // Buat form untuk radio buttons
+        const radioForm = document.createElement('div');
+        radioForm.className = 'rs-radio-container';
+        
+        // Buat radio button untuk setiap kode RS/RSL
+        motifData[motifType].forEach(code => {
+            // Buat label dan radio button
+            const radioLabel = document.createElement('label');
+            radioLabel.className = 'rs-radio-label';
+            
+            const radioInput = document.createElement('input');
+            radioInput.type = 'radio';
+            radioInput.name = 'rs-code';
+            radioInput.value = code;
+            radioInput.id = `rs-code-${code}`;
+            radioInput.className = 'rs-radio';
+            
+            const radioText = document.createTextNode(` ${code}`);
+            
+            radioLabel.appendChild(radioInput);
+            radioLabel.appendChild(radioText);
+            
+            radioInput.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedMotifCode = this.value;
+                    
+                    // Update field nama_ket
+                    updateMotifField(this.value);
+                }
+            });
+            
+            radioForm.appendChild(radioLabel);
+        });
+        
+        rsContainer.appendChild(radioForm);
+    }
+    
+    // Fungsi untuk mengupdate field Motif/Kode di nama_ket
+    function updateMotifField(code) {
+        const namaKetField = document.getElementById('nama_ket');
+        const namaKetText = namaKetField.value;
+        
+        // Update nilai Motif/Kode dalam nama_ket
+        const updatedText = namaKetText.replace(
+            /(Motif\/Kode\s+:).*?(\r?\n|$)/,
+            `$1 ${code}$2`
+        );
+        
+        namaKetField.value = updatedText;
+    }
 
     // Ambil admin yang sedang login dari localStorage
     const currentAdminId = localStorage.getItem('currentAdminId');
@@ -351,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inisialisasi nilai default untuk nama_ket jika kosong
     const namaKet = document.getElementById('nama_ket');
     if (namaKet && !namaKet.value.trim()) {
-        namaKet.value = ` Nama                  : \n Type                    : \n Warna                 : \n Note                    : `;
+        namaKet.value = `Note               : \n Produk             : \n Type               : \n Size               : \n\n Nama Depan        : \n Nama Belakang     : \n Motif/Kode         : \n Keterangan         :`;
     }
     
     // Handle form submission
@@ -501,25 +589,39 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>`;
                 // Reset form on success
                 setTimeout(() => {
+                    // Reset form dan semua nilai
                     orderForm.reset();
                     selectedProductId = null;
                     selectedType = null;
                     selectedMaterial = null;
                     selectedFile = null;
+                    selectedMotifType = '';
+                    selectedMotifCode = '';
                     
                     // Reset UI elements
                     materialButtons.forEach(btn => btn.classList.remove('active'));
                     typeRadios.forEach(radio => radio.checked = false);
                     platformRadios.forEach(radio => radio.checked = false);
+                    document.querySelectorAll('.motif-btn').forEach(btn => btn.classList.remove('active'));
                     
+                    // Reset product dropdown
                     if (productSelect) {
                         productSelect.innerHTML = '<option value="">-- Pilih Produk --</option>';
                     }
                     
+                    // Reset containers
                     if (productSelectionGroup) {
                         productSelectionGroup.style.display = 'none';
                     }
                     
+                    // Reset RS buttons container
+                    const rsContainer = document.getElementById('rsButtonsContainer');
+                    if (rsContainer) {
+                        rsContainer.innerHTML = '';
+                        rsContainer.style.display = 'none';
+                    }
+                    
+                    // Reset preview image
                     if (previewImage) {
                         previewImage.style.display = 'none';
                         previewImage.src = '';
@@ -527,9 +629,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Reset keterangan
                     if (namaKet) {
-                        namaKet.value = ` Nama                  : \n Type                    : \n Motif/Kode         : \n Keterangan       : \n Note : DESAIN KIRIM ADMIN DULU`;
+                        namaKet.value = `Note               : \nProduk             : \nType               : \nSize               : \n\nNama Depan         : \nNama Belakang      : \nMotif/Kode         : \nKeterangan         :`;
                     }
-                }, 500); // Delay reset to prevent refresh issues
+                    
+                    // Tampilkan pesan sukses selama beberapa detik
+                    setTimeout(() => {
+                        responseMessage.style.display = 'none';
+                    }, 3000);
+                }, 1000); // Delay reset to prevent refresh issues
             } else {
                 responseMessage.innerHTML = `
                     <div class="alert alert-warning" style="
